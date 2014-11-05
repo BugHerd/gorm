@@ -498,6 +498,12 @@ func (scope *Scope) createJoinTable(field *Field) {
 		if !scope.Dialect().HasTable(scope, field.Relationship.JoinTable) {
 			newScope := scope.db.NewScope("")
 			primaryKeySqlType := scope.Dialect().SqlTag(reflect.ValueOf(scope.PrimaryKeyValue()), 255)
+
+			tag := scope.fields[scope.primaryKey].Tag.Get("sql")
+			if len(tag) >= 9 && tag[0:9] == "type:uuid" {
+				primaryKeySqlType = "uuid"
+			}
+
 			newScope.Raw(fmt.Sprintf("CREATE TABLE %v (%v)",
 				field.Relationship.JoinTable,
 				strings.Join([]string{
